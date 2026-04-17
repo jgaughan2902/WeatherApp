@@ -1,0 +1,7 @@
+requests
+pandas
+datetime
+zoneinfo
+time
+streamlit
+plotly.express
