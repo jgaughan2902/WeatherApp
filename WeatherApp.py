@@ -79,6 +79,33 @@ def deg_to_cardinal(deg):
     ix = round(deg / 22.5)
     return dirs[ix % 16]
 
+# Get Coordinates
+@st.cache_data(ttl = 3600)
+def get_point_data(lat, lon):
+    url = f"https://api.weather.gov/points/{lat},{lon}"
+    return requests.get(url, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
+
+# Get Station Identification
+@st.cache_data(ttl = 3600)
+def get_station_id(obs):
+    stations = requests.get(obs, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
+    return stations["features"][0]["properties"]["stationIdentifier"]
+
+# Get Current Conditions
+@st.cache_data(ttl = 600)
+def get_current_conditions(station_id):
+    url = f"https://api.weather.gov/stations/{station_id}/observations/latest"
+    return requests.get(url, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
+
+# Get Hourly Forecast
+@st.cache_data(ttl = 1800)
+def get_hourly_forecast(url):
+    return requests.get(url, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
+
+# Get 7 Day Forecast
+@st.cache_data(ttl = 3600)
+def get_7day_forecast(url):
+    return requests.get(url, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
 ##############################################
 
 st.title("Your Weather Forecast")
@@ -97,27 +124,20 @@ if city_input:
         st.error("City/Town Not Found. Try Again!")
 
 if lat and lon:
-    url = f"https://api.weather.gov/points/{lat},{lon}"
-
-    response = requests.get(url, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"})
-    data = response.json()
+    data = get_point_data(lat, lon)
     properties = data["properties"]
 
     timezone_str = properties["timeZone"]
-    seven_day_forecast = properties["forecast"]
-    hourly_forecast = properties["forecastHourly"]
+    seven_day_url = properties["forecast"]
+    hourly_url = properties["forecastHourly"]
     obs = properties["observationStations"]
 
     st.subheader("Current Conditions")
 
     # Current Conditions
-    stations = requests.get(obs, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
-    station_id = stations["features"][0]["properties"]["stationIdentifier"]
+    station_id = get_station_id(obs)
 
-    current = requests.get(
-        f"https://api.weather.gov/stations/{station_id}/observations/latest",
-        headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}
-    ).json()
+    current = get_current_conditions(station_id)
 
     properties = current["properties"]
 
@@ -158,7 +178,7 @@ if lat and lon:
     st.subheader("Hourly Forecast")
 
     # Hourly Forecast Table
-    hourly_forecast = requests.get(hourly_forecast, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
+    hourly_forecast = get_hourly_forecast(hourly_url)
     periods = hourly_forecast["properties"]["periods"]
 
     time_list = []
@@ -191,7 +211,7 @@ if lat and lon:
     st.subheader("7 Day Forecast")
 
     # Seven Day Forecast Table
-    forecast = requests.get(seven_day_forecast, headers = {"User-Agent" : "MyWeatherApp (joshgaughan2902@gmail.com)"}).json()
+    forecast = get_7day_forecast(seven_day_url)
     periods = forecast["properties"]["periods"]
 
     name_list = []
