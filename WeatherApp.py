@@ -21,7 +21,16 @@ def geocode_city(city_name):
 
     time.sleep(1)
 
-    response = requests.get(url, params = params, headers = headers)
+    response = requests.get(url, params = params, headers = headers, timeout = 10)
+
+    if response.status_code != 200:
+        return None, None, None
+    
+    try:
+        results = response.json()
+    except ValueError:
+        return None, None, None
+
     results = response.json()
 
     if results:
