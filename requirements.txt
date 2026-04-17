@@ -1,7 +1,4 @@
-requests
-pandas
-datetime
-zoneinfo
-time
-streamlit
-plotly.express
+pandas==2.3.2
+plotly==6.3.0
+requests==2.32.4
+streamlit==1.51.0
