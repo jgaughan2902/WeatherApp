@@ -6,6 +6,9 @@ Provided in this repository is the single .py file used to create the current ve
 
 The intention is to update it in the future to add functionality.
 
+The API used:
+https://api.weather.gov/
+
 ### Version 1.0.1
 
 Code updated to include caching mechanisms to (hopefully) improve performance.
